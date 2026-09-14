@@ -152,7 +152,7 @@ export function App() {
         <span style={{ color: "#334155" }}>
           BoltClaw&nbsp;·&nbsp;Security control panel for Claude Code skills and MCP servers&nbsp;·&nbsp;
           <a
-            href="https://github.com/Sonofg0tham/BoltClaw"
+            href="https://github.com/craigmccart/BoltClaw"
             target="_blank"
             rel="noopener noreferrer"
             style={{ color: "rgba(220,38,38,0.5)", textDecoration: "none" }}

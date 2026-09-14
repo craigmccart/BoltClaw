@@ -165,8 +165,8 @@ Every config change creates an automatic backup. All changes are reversible.
 
 ## Links
 
-- [GitHub](https://github.com/Sonofg0tham/BoltClaw)
-- [Dashboard](https://github.com/Sonofg0tham/BoltClaw/tree/main/packages/dashboard) - web UI with setup wizard, permission grid, and audit log
+- [GitHub](https://github.com/craigmccart/BoltClaw)
+- [Dashboard](https://github.com/craigmccart/BoltClaw/tree/main/packages/dashboard) - web UI with setup wizard, permission grid, and audit log
 
 ## Licence
 
