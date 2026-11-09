@@ -1,6 +1,8 @@
 # BoltClaw
 
-[![npm version](https://img.shields.io/npm/v/boltclaw.svg)](https://www.npmjs.com/package/boltclaw)
+[![npm](https://img.shields.io/npm/v/boltclaw?style=flat-square&label=npm)](https://www.npmjs.com/package/boltclaw)
+[![CI](https://img.shields.io/github/actions/workflow/status/craigmccart/BoltClaw/ci.yml?style=flat-square&label=CI)](https://github.com/craigmccart/BoltClaw/actions/workflows/ci.yml)
+[![Licence](https://img.shields.io/github/license/craigmccart/BoltClaw?style=flat-square&label=licence)](LICENSE)
 
 **The security control panel for Claude Code skills and MCP servers**
 

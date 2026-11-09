@@ -1,0 +1,7 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Report a security vulnerability in BoltClaw
+    url: https://github.com/craigmccart/BoltClaw/blob/main/SECURITY.md
+    about: >-
+      Please read SECURITY.md before reporting a security problem in
+      BoltClaw itself.
