@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { writeFile, mkdir, rm } from "node:fs/promises";
+import { writeFile, mkdir, mkdtemp, rm, symlink } from "node:fs/promises";
 import { join } from "node:path";
 import { tmpdir } from "node:os";
 
@@ -14,9 +14,9 @@ import { scanSkill } from "./analyzer.js";
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
 async function makeTempDir(name: string): Promise<string> {
-  const dir = join(tmpdir(), `boltclaw-test-${name}-${Date.now()}`);
-  await mkdir(dir, { recursive: true });
-  return dir;
+  // mkdtemp creates the directory atomically with a random suffix and
+  // owner-only permissions, so another local user cannot pre-create it.
+  return mkdtemp(join(tmpdir(), `boltclaw-test-${name}-`));
 }
 
 async function cleanup(dir: string) {
@@ -266,5 +266,29 @@ test("scanSkill: screen capture pattern is detected (warning)", async () => {
     assert.equal(match?.pattern.severity, "warning");
   } finally {
     await cleanup(dir);
+  }
+});
+
+test("scanSkill: does not follow symlinks out of the scan directory", async (t) => {
+  const outside = await makeTempDir("symlink-target");
+  const dir = await makeTempDir("symlink");
+  try {
+    // A file outside the scan directory that would trip the clipboard pattern.
+    const secret = join(outside, "secret.py");
+    await writeFile(secret, "import pyperclip\ndata = pyperclip.paste()\n");
+    await writeFile(join(dir, "SKILL.md"), "# Safe skill\n");
+    try {
+      await symlink(secret, join(dir, "linked.py"));
+    } catch {
+      // Creating symlinks needs elevated rights on some Windows setups.
+      t.skip("symlinks not available on this machine");
+      return;
+    }
+    const result = await scanSkill(dir);
+    assert.equal(result.matches.length, 0, "content behind a symlink must not be read");
+    assert.equal(result.scannedFiles, 1);
+  } finally {
+    await cleanup(dir);
+    await cleanup(outside);
   }
 });

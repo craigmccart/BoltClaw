@@ -37,7 +37,8 @@ BoltClaw applies the following security measures to its own codebase:
 - **API authentication** - shared-secret token required for all API endpoints except health check, with constant-time comparison
 - **Input validation** - Zod schemas on all API request bodies
 - **Path traversal prevention** - scan paths validated against a configurable root directory, sensitive paths explicitly blocked
-- **Scan rate limiting** - concurrent scan limit to prevent resource exhaustion
+- **Rate limiting** - per-client request limit on the whole server (600 requests a minute by default, override with `BOLTCLAW_RATE_LIMIT`), plus a concurrent scan limit to prevent resource exhaustion
+- **No symlink following** - the scanner skips symbolic links, so a skill cannot point the scanner at files outside its own directory
 - **CSP headers** - Helmet with a restrictive Content Security Policy
 - **Automatic backups** - every config write creates a timestamped backup
 - **Audit logging** - all config reads, writes, restores, and scans are logged with timestamps

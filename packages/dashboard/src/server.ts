@@ -13,6 +13,7 @@ import { randomBytes, timingSafeEqual } from "node:crypto";
 import { fileURLToPath } from "node:url";
 import { z } from "zod";
 import multer from "multer";
+import { rateLimit } from "express-rate-limit";
 import { ScanRequestSchema, validateLocalScanPath, SCAN_ROOT } from "./validation.js";
 
 const execFileAsync = promisify(execFile);
@@ -32,6 +33,19 @@ app.use(helmet({
   },
 }));
 app.use(express.json({ limit: "1mb" }));
+
+// Rate limiting. BoltClaw is a local tool, so the limit is generous enough
+// that normal dashboard use never hits it. It exists to stop a runaway or
+// hostile local process from hammering the API or brute-forcing the token.
+// Scans are also capped separately by MAX_CONCURRENT_SCANS below.
+const RATE_LIMIT_MAX = parseInt(process.env.BOLTCLAW_RATE_LIMIT || "600", 10);
+app.use(rateLimit({
+  windowMs: 60 * 1000,
+  limit: RATE_LIMIT_MAX,
+  standardHeaders: "draft-7",
+  legacyHeaders: false,
+  message: { error: "Too many requests, please slow down" },
+}));
 
 const PORT = parseInt(process.env.PORT || "3000", 10);
 
@@ -183,8 +197,6 @@ let activeScans = 0;
 const MAX_CONCURRENT_SCANS = 3;
 
 // --- GitHub URL Fetching ---
-
-const GITHUB_URL_RE = /^https:\/\/github\.com\/[\w.-]+\/[\w.-]+(\/tree\/[\w.-]+\/([\w./-]+))?$/;
 
 // Hard caps to prevent DoS via giant-repo cloning.
 // 50 MB covers any realistic skill repo; 10k files covers any realistic skill tree.

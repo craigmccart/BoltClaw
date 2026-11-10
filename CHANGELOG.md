@@ -2,6 +2,25 @@
 
 All notable changes to BoltClaw are documented here.
 
+## [Unreleased]
+
+### Security hardening
+
+- **Scanner no longer follows symlinks** — a scanned skill could previously include a symbolic
+  link to a file outside its own directory and have matching lines echoed back in scan results.
+- **Rate limiting on the dashboard server** — 600 requests a minute per client by default,
+  configurable with `BOLTCLAW_RATE_LIMIT`.
+- **File size check and read now use one file handle** — closes a check-then-read race in the
+  scanner.
+- **Dependency updates** — `npm audit` findings reduced from 20 to 1 (low severity, dev-only
+  build tool). Runtime dependencies have none.
+
+### Repo tooling
+
+- CodeQL and Dependabot enabled. CI actions pinned to commit SHAs.
+- Added CONTRIBUTING, CODE_OF_CONDUCT, issue and PR templates.
+- Unit tests create temp directories with `mkdtemp` instead of predictable names.
+
 ## [1.1.0] - 2026-04-22
 
 ### Scanner improvements

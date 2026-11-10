@@ -1,8 +1,6 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import { z } from "zod";
-import { execFile } from "node:child_process";
-import { promisify } from "node:util";
 import { readdir } from "node:fs/promises";
 import { existsSync } from "node:fs";
 import { join } from "node:path";
@@ -356,7 +354,6 @@ server.registerTool(
 
 // --- scan_installed_skills ---
 
-const execFileAsync = promisify(execFile);
 
 async function discoverSkillDirs(): Promise<Array<{ root: string; source: "installed" | "bundled" }>> {
   const dirs: Array<{ root: string; source: "installed" | "bundled" }> = [];
