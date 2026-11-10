@@ -14,24 +14,21 @@ BoltClaw runs `npm audit` before every release. The policy is:
 
 ## Current status
 
-Last audited: 2026-04-16
+Last audited: 2026-11-10
 
-### Resolved in this release
+### Resolved in this audit
 
-All 5 findings were in **Vite** (`node_modules/vite`), a dev-only build tool that is never included in the production dashboard or MCP server builds. Resolved via `npm audit fix`:
-
-- 2 moderate severity vulnerabilities
-- 3 high severity vulnerabilities
-
-All 5 were fixable with a non-breaking version bump to Vite. No runtime dependencies were affected.
+`npm audit` reported 20 findings (1 critical, 12 high, 5 moderate, 2 low) after several months without dependency updates. 19 were resolved with non-breaking minor and patch bumps, first through a grouped Dependabot update and then `npm audit fix`.
 
 ### Deferred findings
 
-None. All findings resolved.
+1 low severity finding in **esbuild** ([GHSA-g7r4-m6w7-qqqr](https://github.com/advisories/GHSA-g7r4-m6w7-qqqr)), pulled in by the build tools tsup and Vite. It affects esbuild's development server on Windows. esbuild is a dev-only build dependency and is never included in the production dashboard or MCP server builds. Deferred until tsup and Vite pick up a patched esbuild.
 
 ### Runtime dependency status
 
-Zero known vulnerabilities in runtime dependencies as of last audit date. Runtime deps include: Express 5.2.1, Helmet 8.1.0, Multer 2.1.1, Zod 4.3.6, dotenv, @modelcontextprotocol/sdk.
+Zero known vulnerabilities in runtime dependencies as of last audit date (`npm audit --omit=dev`). Runtime deps include: Express 5.3.0, Helmet 8.3.0, Multer 2.5.0, Zod 4.6.7, dotenv, @modelcontextprotocol/sdk.
+
+Dependabot now opens weekly update PRs, and CodeQL scans every push and pull request.
 
 ## Hardening measures
 
