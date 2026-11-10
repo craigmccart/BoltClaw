@@ -1,4 +1,4 @@
-import { readFile, readdir, stat } from "node:fs/promises";
+import { open, readdir, stat } from "node:fs/promises";
 import { join } from "node:path";
 import { THREAT_PATTERNS, type ThreatPattern, type Severity } from "./patterns.js";
 
@@ -61,6 +61,10 @@ async function collectFiles(dir: string, depth = 0): Promise<string[]> {
 
   for (const entry of entries) {
     if (results.length >= MAX_FILE_COUNT) break;
+    // Never follow symlinks. A skill repo could ship a link pointing outside
+    // the scan directory (for example at a private key) to get its contents
+    // read and echoed back in scan results.
+    if (entry.isSymbolicLink()) continue;
     const fullPath = join(dir, entry.name);
     if (entry.isDirectory()) {
       if (SKIP_DIRS.has(entry.name) || entry.name.startsWith(".env")) continue;
@@ -106,9 +110,17 @@ export async function scanSkill(skillPath: string, originalPath?: string): Promi
   const matches: ScanMatch[] = [];
 
   for (const file of files) {
-    const fileInfo = await stat(file);
-    if (fileInfo.size > MAX_FILE_SIZE) continue;
-    const content = await readFile(file, "utf-8");
+    // Size-check and read through the same file handle so the file cannot be
+    // swapped between the check and the read.
+    let content: string;
+    const handle = await open(file, "r");
+    try {
+      const fileInfo = await handle.stat();
+      if (fileInfo.size > MAX_FILE_SIZE) continue;
+      content = await handle.readFile("utf-8");
+    } finally {
+      await handle.close();
+    }
     const lines = content.split("\n");
 
     for (const pattern of THREAT_PATTERNS) {

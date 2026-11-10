@@ -153,7 +153,7 @@ npm run test:ui   # Run with Playwright UI for debugging
 
 ### Unit tests
 
-26 unit tests across two packages (dashboard API validation and skill-scanner analysis engine). No containers needed:
+27 unit tests across two packages (dashboard API validation and skill-scanner analysis engine). No containers needed:
 
 ```bash
 npm run test:unit
