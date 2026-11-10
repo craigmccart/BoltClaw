@@ -1,0 +1,68 @@
+name: Bug report
+description: BoltClaw crashed, gave a wrong scan result, or behaved unexpectedly.
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: >-
+        Do **not** use this form for a security vulnerability in BoltClaw
+        itself. See
+        [SECURITY.md](https://github.com/craigmccart/BoltClaw/blob/main/SECURITY.md)
+        for how to report those.
+
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened
+      description: What did you expect, and what did you get instead?
+    validations:
+      required: true
+
+  - type: textarea
+    id: repro
+    attributes:
+      label: Steps to reproduce
+      description: >-
+        The exact steps or command. If a scan gave the wrong result, include
+        the skill or MCP server you scanned if it is safe to share.
+      render: shell
+    validations:
+      required: true
+
+  - type: input
+    id: version
+    attributes:
+      label: BoltClaw version
+      placeholder: "1.1.0"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: surface
+    attributes:
+      label: Which part of BoltClaw?
+      multiple: true
+      options:
+        - Setup Wizard
+        - Skill Scanner
+        - Permission Dashboard
+        - Audit Log
+        - MCP server (npm package)
+        - Docker setup
+    validations:
+      required: true
+
+  - type: input
+    id: environment
+    attributes:
+      label: OS and Node version
+      placeholder: "Windows 11, Node 22"
+    validations:
+      required: true
+
+  - type: textarea
+    id: output
+    attributes:
+      label: Output or error
+      description: Full output, including any stack trace. Remove any secrets first.
+      render: shell
