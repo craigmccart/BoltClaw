@@ -2,7 +2,23 @@
 
 All notable changes to BoltClaw are documented here.
 
-## [Unreleased]
+## [1.1.1] - 2026-11-18
+
+### Security fix
+
+- **API token was readable without authentication** — the dashboard embedded the token in the
+  HTML served for any non-root page path, and the server listened on all network interfaces.
+  Anyone who could reach port 3000 could read the token and use the API. The token is no longer
+  embedded in any page, and the server now listens on `127.0.0.1` by default (`HOST` overrides).
+  See SECURITY.md. The `boltclaw` npm package (MCP server) was not affected.
+- The dashboard keeps the token for the browser tab, so a reload no longer loses it, and shows a
+  plain notice when opened without a token instead of a blank page.
+- docker-compose publishes the dashboard port on loopback only.
+
+### Tests
+
+- End-to-end tests now authenticate (they predated token auth and had been failing), and three
+  new ones cover token handling. Run them with `BOLTCLAW_API_TOKEN` set. 24 end-to-end, 29 unit.
 
 ### Security hardening
 

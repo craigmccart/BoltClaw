@@ -4,6 +4,16 @@
 
 If you find a security issue in BoltClaw, please open a GitHub issue or email craig.mccart@outlook.com. BoltClaw is a portfolio project maintained by one person, so there is no bug bounty, but all reports will be acknowledged and addressed.
 
+## Security fixes
+
+### 1.1.1 - API token readable without authentication
+
+Versions 1.0.0 and 1.1.0 of the dashboard embedded the API token in the HTML returned for any non-root page path (for example `/anything`). That route needs no authentication, and the server listened on all network interfaces, so anyone who could reach port 3000 could read the token and then use the API to read or change the agent config. Opening the root path `/` did not expose it, which is why it went unnoticed.
+
+Fixed in 1.1.1: the token is no longer embedded in any page, the server listens on `127.0.0.1` by default, and unit and end-to-end tests now check that unauthenticated pages never contain the token. The `boltclaw` npm package (the MCP server) does not include the dashboard server and was not affected.
+
+If you ran the dashboard on an untrusted network, delete `~/.openclaw/boltclaw-token` and restart BoltClaw to generate a new token.
+
 ## Dependency hygiene policy
 
 BoltClaw runs `npm audit` before every release. The policy is:
@@ -34,7 +44,8 @@ Dependabot now opens weekly update PRs, and CodeQL scans every push and pull req
 
 BoltClaw applies the following security measures to its own codebase:
 
-- **API authentication** - shared-secret token required for all API endpoints except health check, with constant-time comparison
+- **API authentication** - shared-secret token required for all API endpoints except health check, with constant-time comparison. The token is never embedded in a served page
+- **Loopback only** - the dashboard server listens on `127.0.0.1` by default, and docker-compose publishes its port on loopback only
 - **Input validation** - Zod schemas on all API request bodies
 - **Path traversal prevention** - scan paths validated against a configurable root directory, sensitive paths explicitly blocked
 - **Rate limiting** - per-client request limit on the whole server (600 requests a minute by default, override with `BOLTCLAW_RATE_LIMIT`), plus a concurrent scan limit to prevent resource exhaustion

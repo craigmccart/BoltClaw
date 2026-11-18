@@ -80,3 +80,51 @@ test("CLONE_MAX_BYTES and CLONE_MAX_FILES are set to 50 MB and 10k", () => {
   assert.equal(CLONE_MAX_BYTES, 50 * 1024 * 1024);
   assert.equal(CLONE_MAX_FILES, 10_000);
 });
+
+// ─── Token exposure ───────────────────────────────────────────────────────────
+// The API token must never be readable without already having it. An earlier
+// version embedded it in the HTML served by the unauthenticated SPA fallback
+// route, so any request to a non-root path could read it.
+
+const { app } = await import("./server.js");
+
+async function withServer(fn: (base: string) => Promise<void>): Promise<void> {
+  const server = app.listen(0, "127.0.0.1");
+  await new Promise<void>((resolve) => server.once("listening", resolve));
+  const address = server.address();
+  const port = typeof address === "object" && address ? address.port : 0;
+  try {
+    await fn(`http://127.0.0.1:${port}`);
+  } finally {
+    await new Promise<void>((resolve) => server.close(() => resolve()));
+  }
+}
+
+test("unauthenticated pages never contain the API token", async () => {
+  const token = process.env.BOLTCLAW_API_TOKEN!;
+  await withServer(async (base) => {
+    for (const path of ["/", "/anything", "/deep/link/page", "/index.html"]) {
+      const res = await fetch(base + path);
+      const body = await res.text();
+      assert.ok(!body.includes(token), `${path} leaked the API token`);
+      assert.ok(!body.includes("__BOLTCLAW_TOKEN__="), `${path} still injects a token script`);
+    }
+  });
+});
+
+test("API rejects requests without a token and accepts the right one", async () => {
+  const token = process.env.BOLTCLAW_API_TOKEN!;
+  await withServer(async (base) => {
+    const anonymous = await fetch(`${base}/api/profiles`);
+    assert.equal(anonymous.status, 401);
+
+    const wrong = await fetch(`${base}/api/profiles`, { headers: { "x-boltclaw-token": "nope" } });
+    assert.equal(wrong.status, 401);
+
+    const ok = await fetch(`${base}/api/profiles`, { headers: { "x-boltclaw-token": token } });
+    assert.equal(ok.status, 200);
+
+    const health = await fetch(`${base}/api/health`);
+    assert.equal(health.status, 200);
+  });
+});

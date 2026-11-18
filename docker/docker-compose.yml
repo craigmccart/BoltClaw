@@ -36,7 +36,8 @@ services:
       dockerfile: docker/Dockerfile.dashboard
     container_name: boltclaw-dashboard
     ports:
-      - "3000:3000"
+      # Loopback only: the dashboard is not reachable from other machines.
+      - "127.0.0.1:3000:3000"
     volumes:
       - ./openclaw-defaults:/config
       - ../test-skills:/test-skills:ro
@@ -45,6 +46,10 @@ services:
     environment:
       - NODE_ENV=production
       - OPENCLAW_CONFIG_PATH=/config/openclaw.json
+      # Optional. Leave unset and BoltClaw generates a random token and prints
+      # it in the container logs (docker logs boltclaw-dashboard). Set it to
+      # choose your own, which the Playwright tests need.
+      - BOLTCLAW_API_TOKEN=${BOLTCLAW_API_TOKEN:-}
 
 networks:
   boltclaw-net:

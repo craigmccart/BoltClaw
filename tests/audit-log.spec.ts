@@ -1,14 +1,15 @@
 import { test, expect } from "@playwright/test";
+import { APP_URL } from "./helpers.js";
 
 test.describe("Audit Log", () => {
   test("shows the audit log page", async ({ page }) => {
-    await page.goto("/");
+    await page.goto(APP_URL);
     await page.click("text=Audit Log");
     await expect(page.locator("h2:has-text('Audit Log')")).toBeVisible();
   });
 
   test("shows filter buttons", async ({ page }) => {
-    await page.goto("/");
+    await page.goto(APP_URL);
     await page.click("text=Audit Log");
     await expect(page.locator("button:has-text('All')")).toBeVisible();
     await expect(page.locator("button:has-text('Info')")).toBeVisible();

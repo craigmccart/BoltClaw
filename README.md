@@ -76,9 +76,12 @@ npm run docker:up
 
 # Optional: pull a local LLM model for agent testing
 npm run docker:pull-model
+```
 
-# Run the Playwright test suite (requires containers running)
-npm test
+Then open the authenticated URL from the dashboard's logs (see [Authentication](#authentication)):
+
+```bash
+docker logs boltclaw-dashboard
 ```
 
 For local development without Docker:
@@ -98,7 +101,9 @@ BoltClaw API token: abc123...
   Authenticated URL: http://localhost:3000?token=abc123...
 ```
 
-Click the authenticated URL to open the dashboard. The token is stripped from the browser address bar automatically so it doesn't leak into history or referer headers.
+Click the authenticated URL to open the dashboard. The token is stripped from the browser address bar automatically so it doesn't leak into history or referer headers, and is kept for that browser tab only. Opening the dashboard without a token shows a short notice telling you where to find the URL.
+
+The server never puts the token in a page it serves, and it listens on `127.0.0.1` only, so it cannot be reached from other machines. Set `HOST` to change the listen address (the Docker image sets `HOST=0.0.0.0` and docker-compose publishes the port on loopback only).
 
 To use a custom token, set the `BOLTCLAW_API_TOKEN` environment variable before starting BoltClaw.
 
@@ -147,16 +152,21 @@ Reads and writes your agent config plus a `boltclaw.json` sidecar for BoltClaw-s
 
 ### End-to-end tests (Playwright)
 
-21 tests across 5 suites covering UI rendering, navigation flows, API validation, security input sanitisation, and config round-trips:
+24 tests across 5 suites covering UI rendering, navigation flows, API validation, security input sanitisation, token handling, and config round-trips.
+
+The tests need to authenticate, so start BoltClaw with a token you choose and give the tests the same value:
 
 ```bash
-npm test          # Run all tests (headless)
-npm run test:ui   # Run with Playwright UI for debugging
+BOLTCLAW_API_TOKEN=e2e-local-token npm run docker:up
+BOLTCLAW_API_TOKEN=e2e-local-token npm test          # Run all tests (headless)
+BOLTCLAW_API_TOKEN=e2e-local-token npm run test:ui   # Run with Playwright UI for debugging
 ```
+
+In PowerShell, set it once with `$env:BOLTCLAW_API_TOKEN = "e2e-local-token"` and then run the commands without the prefix.
 
 ### Unit tests
 
-27 unit tests across two packages (dashboard API validation and skill-scanner analysis engine). No containers needed:
+29 unit tests across two packages (dashboard API validation, token handling, and skill-scanner analysis engine). No containers needed:
 
 ```bash
 npm run test:unit

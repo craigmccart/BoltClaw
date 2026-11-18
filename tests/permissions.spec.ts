@@ -1,8 +1,9 @@
 import { test, expect } from "@playwright/test";
+import { APP_URL } from "./helpers.js";
 
 test.describe("Permission Dashboard", () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto("/");
+    await page.goto(APP_URL);
     await page.locator("nav").getByText("Permissions").click();
   });
 
