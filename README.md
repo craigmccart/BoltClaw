@@ -1,4 +1,7 @@
-# BoltClaw
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/craigmccart/BoltClaw/main/assets/boltclaw-logo-dark.svg">
+  <img src="https://raw.githubusercontent.com/craigmccart/BoltClaw/main/assets/boltclaw-logo-light.svg" alt="BoltClaw" height="56">
+</picture>
 
 [![npm](https://img.shields.io/npm/v/boltclaw?style=flat-square&label=npm)](https://www.npmjs.com/package/boltclaw)
 [![CI](https://img.shields.io/github/actions/workflow/status/craigmccart/BoltClaw/ci.yml?style=flat-square&label=CI)](https://github.com/craigmccart/BoltClaw/actions/workflows/ci.yml)
