@@ -660,25 +660,14 @@ const resolvedClientDir = existsSync(clientDist) ? clientDist : existsSync(clien
 if (resolvedClientDir) {
   app.use(express.static(resolvedClientDir));
 
-  // Serve index.html with the API token injected so the React app
-  // can authenticate without the user needing to copy-paste tokens.
-  let indexHtmlCache: string | null = null;
-  app.get("*splat", async (_req, res) => {
-    try {
-      if (!indexHtmlCache) {
-        indexHtmlCache = await readFile(join(resolvedClientDir, "index.html"), "utf-8");
-      }
-      // Inject a script tag that sets the token before the React app loads.
-      // The token is safe to embed here because the page is only served on
-      // localhost and requires the token to reach any API endpoint anyway.
-      const injected = indexHtmlCache.replace(
-        "</head>",
-        `<script>window.__BOLTCLAW_TOKEN__=${JSON.stringify(API_TOKEN)};</script>\n</head>`,
-      );
-      res.type("html").send(injected);
-    } catch {
-      res.sendFile(join(resolvedClientDir, "index.html"));
-    }
+  // SPA fallback: every non-API, non-asset path gets the plain index.html.
+  //
+  // The page must never contain the API token. This route is unauthenticated,
+  // so anything embedded here is readable by whoever can reach the port. The
+  // browser gets the token from the authenticated URL printed at startup
+  // (?token=...), and api.ts keeps it for the life of the tab.
+  app.get("*splat", (_req, res) => {
+    res.sendFile(join(resolvedClientDir, "index.html"));
   });
 }
 
@@ -692,9 +681,17 @@ const isEntryPoint = (() => {
   }
 })();
 
+// Bind to loopback unless told otherwise, so the dashboard is not reachable
+// from other machines on the network. The Docker image sets HOST=0.0.0.0
+// because the container needs to accept the published port; docker-compose
+// publishes that port on 127.0.0.1 only.
+const HOST = process.env.HOST || "127.0.0.1";
+
+export { app };
+
 if (isEntryPoint) {
-  app.listen(PORT, () => {
-    console.log(`BoltClaw dashboard running on http://localhost:${PORT}`);
+  app.listen(PORT, HOST, () => {
+    console.log(`BoltClaw dashboard running on http://localhost:${PORT} (bound to ${HOST})`);
     console.log(`  Authenticated URL: http://localhost:${PORT}?token=${API_TOKEN}`);
   });
 }
